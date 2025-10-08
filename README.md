@@ -67,10 +67,10 @@
    git clone https://github.com/ber17lino/ParallelWindowsForms.git
 2. Убедитесь, что установлена .NET 8 SDK.
 3. Создайте папку Texts в каталоге запуска приложения и поместите туда 5 текстовых файлов с расширением .txt (на английском языке).
-   bin\Debug\net8.0-windows\Texts\
+   * bin\Debug\net8.0-windows\Texts\
 4. Откройте проект в Visual Studio или соберите через CLI:
-   dotnet build
-   dotnet run
+   * dotnet build
+   * dotnet run
 5. Используйте интерфейс:
 * Вкладка MapReduce → нажмите "Запустить задачу 1"
 * Вкладка Микросервисы → нажмите "Запустить задачу 2"
