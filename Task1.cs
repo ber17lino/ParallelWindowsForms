@@ -10,9 +10,8 @@ namespace ParallelProcessingApp
 {
     public static class Task1
     {
-        public static async Task RunMapReduceAsync(RichTextBox output)
+        public static async Task RunMapReduceAsync(RichTextBox output, string[] wordsToFind)
         {
-            var wordsToFind = new[] { "the", "and", "is", "in", "to", "of", "a", "it", "this", "that" };
             var textsFolder = Path.Combine(Application.StartupPath, "Texts");
 
             if (!Directory.Exists(textsFolder))

@@ -30,6 +30,8 @@
         {
             Tabs = new TabControl();
             MapReduceTabPage = new TabPage();
+            lblWordsToFind = new Label();
+            txtWordsToFind = new TextBox();
             MapReduceTaskOutput = new RichTextBox();
             btnStartTask1 = new Button();
             MicroservicesTabPage = new TabPage();
@@ -60,6 +62,8 @@
             // 
             // MapReduceTabPage
             // 
+            MapReduceTabPage.Controls.Add(lblWordsToFind);
+            MapReduceTabPage.Controls.Add(txtWordsToFind);
             MapReduceTabPage.Controls.Add(MapReduceTaskOutput);
             MapReduceTabPage.Controls.Add(btnStartTask1);
             MapReduceTabPage.Location = new Point(4, 29);
@@ -70,6 +74,24 @@
             MapReduceTabPage.Text = "MapReduce";
             MapReduceTabPage.UseVisualStyleBackColor = true;
             MapReduceTabPage.Click += tabPage1_Click;
+            // 
+            // lblWordsToFind
+            // 
+            lblWordsToFind.AutoSize = true;
+            lblWordsToFind.Location = new Point(20, 20);
+            lblWordsToFind.Name = "lblWordsToFind";
+            lblWordsToFind.Size = new Size(165, 20);
+            lblWordsToFind.TabIndex = 2;
+            lblWordsToFind.Text = "Слова(через запятую):";
+            lblWordsToFind.Click += lblWordsToFind_Click;
+            // 
+            // txtWordsToFind
+            // 
+            txtWordsToFind.Location = new Point(183, 17);
+            txtWordsToFind.Name = "txtWordsToFind";
+            txtWordsToFind.Size = new Size(371, 27);
+            txtWordsToFind.TabIndex = 3;
+            txtWordsToFind.TextChanged += txtWordsToFind_TextChanged;
             // 
             // MapReduceTaskOutput
             // 
@@ -83,7 +105,7 @@
             // 
             // btnStartTask1
             // 
-            btnStartTask1.Location = new Point(20, 20);
+            btnStartTask1.Location = new Point(560, 16);
             btnStartTask1.Name = "btnStartTask1";
             btnStartTask1.Size = new Size(149, 29);
             btnStartTask1.TabIndex = 0;
@@ -184,6 +206,7 @@
             Load += Form1_Load;
             Tabs.ResumeLayout(false);
             MapReduceTabPage.ResumeLayout(false);
+            MapReduceTabPage.PerformLayout();
             MicroservicesTabPage.ResumeLayout(false);
             LINQvsPLINQTabPage.ResumeLayout(false);
             LINQvsPLINQTabPage.PerformLayout();
@@ -204,5 +227,7 @@
         private Button btnStartTask3;
         private TextBox textBox1;
         private Label lblEmployees;
+        private Label lblWordsToFind;
+        private TextBox txtWordsToFind;
     }
 }

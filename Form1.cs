@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ParallelProcessingApp
@@ -9,13 +10,33 @@ namespace ParallelProcessingApp
         {
             InitializeComponent();
         }
+
         private async void btnStartTask1_Click(object sender, EventArgs e)
         {
+            string input = txtWordsToFind.Text.Trim();
+            if (string.IsNullOrEmpty(input))
+            {
+                MessageBox.Show("Пожалуйста, введите хотя бы одно слово для поиска.", "Ввод слов", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var wordsToFind = input.Split(new char[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                                   .Select(w => w.Trim().ToLower())
+                                   .Where(w => !string.IsNullOrEmpty(w))
+                                   .Distinct()
+                                   .ToArray();
+
+            if (wordsToFind.Length == 0)
+            {
+                MessageBox.Show("Не удалось извлечь корректные слова. Попробуйте ввести слова через запятую.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             btnStartTask1.Enabled = false;
             MapReduceTaskOutput.Clear();
             try
             {
-                await Task1.RunMapReduceAsync(MapReduceTaskOutput);
+                await Task1.RunMapReduceAsync(MapReduceTaskOutput, wordsToFind);
             }
             catch (Exception ex)
             {
@@ -73,9 +94,20 @@ namespace ParallelProcessingApp
                 btnStartTask3.Enabled = true;
             }
         }
+
         private void Form1_Load(object sender, EventArgs e) { }
         private void tabPage1_Click(object sender, EventArgs e) { }
         private void tabPage2_Click(object sender, EventArgs e) { }
         private void richTextBox1_TextChanged(object sender, EventArgs e) { }
+
+        private void txtWordsToFind_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblWordsToFind_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

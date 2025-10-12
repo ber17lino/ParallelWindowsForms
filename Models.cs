@@ -4,8 +4,13 @@ using System.Collections.Concurrent;
 
 namespace ParallelProcessingApp
 {
-    // === Задача 2: Микросервисы ===
-    public class Goods { public int Id { get; set; } }
+    public class Goods
+    {
+        public int Id { get; set; }
+
+        public override bool Equals(object obj) => obj is Goods g && g.Id == Id;
+        public override int GetHashCode() => Id.GetHashCode();
+    }
 
     public class Order
     {
@@ -15,14 +20,17 @@ namespace ParallelProcessingApp
         public string Address { get; set; }
     }
 
-    public class Info { public double Price { get; set; } public int Count { get; set; } }
+    public class Info
+    {
+        public double Price { get; set; }
+        public int Count { get; set; }
+    }
 
     public class Storage
     {
         public ConcurrentDictionary<Goods, Info> Inventory { get; } = new();
     }
 
-    // === Задача 3: LINQ vs PLINQ ===
     public class Employee
     {
         public int Id { get; set; }

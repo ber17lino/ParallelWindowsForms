@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -46,40 +45,20 @@ namespace ParallelProcessingApp
             Utils.AppendText(output, $"   - Заказов: {orders.Count}");
             Utils.AppendText(output, "");
 
-            int fullyProcessed = 0;
-            int missingItems = 0;
-            double totalRevenue = 0;
-            var deliveryStats = new Dictionary<int, int>();
-
             var tasks = new List<Task<OrderResult>>();
-
-            Utils.AppendText(output, "Запуск обработки заказов...");
-            Utils.AppendText(output, "");
-
             foreach (var order in orders)
             {
-                tasks.Add(ProcessOrderAsync(order, storage, logFile));
+                tasks.Add(Task.Run(() => ProcessOrder(order, storage, logFile)));
             }
 
             var results = await Task.WhenAll(tasks);
 
-            foreach (var result in results)
-            {
-                if (result.IsFullyProcessed)
-                {
-                    fullyProcessed++;
-                    totalRevenue += result.FinalAmount;
-
-                    if (deliveryStats.ContainsKey(result.DeliveryDays))
-                        deliveryStats[result.DeliveryDays]++;
-                    else
-                        deliveryStats[result.DeliveryDays] = 1;
-                }
-                else
-                {
-                    missingItems++;
-                }
-            }
+            int fullyProcessed = results.Count(r => r.IsFullyProcessed);
+            int missingItems = results.Count(r => !r.IsFullyProcessed);
+            double totalRevenue = results.Where(r => r.IsFullyProcessed).Sum(r => r.FinalAmount);
+            var deliveryStats = results.Where(r => r.IsFullyProcessed)
+                                       .GroupBy(r => r.DeliveryDays)
+                                       .ToDictionary(g => g.Key, g => g.Count());
 
             Utils.AppendText(output, "РЕЗУЛЬТАТЫ ОБРАБОТКИ:");
             Utils.AppendText(output, new string('=', 50));
@@ -96,20 +75,13 @@ namespace ParallelProcessingApp
             Utils.AppendText(output, $"Подробный лог сохранён в: {logFile}");
             Utils.AppendText(output, "");
             Utils.AppendText(output, "ОБРАБОТКА ЗАВЕРШЕНА!");
-
-            Utils.AppendText(output, "");
-            Utils.AppendText(output, " ДОПОЛНИТЕЛЬНАЯ СТАТИСТИКА:");
-            Utils.AppendText(output, $"   - Эффективность обработки: {(double)fullyProcessed / orders.Count * 100:F1}%");
-            Utils.AppendText(output, $"   - Средний чек: {(fullyProcessed > 0 ? totalRevenue / fullyProcessed : 0):F2} руб.");
-            Utils.AppendText(output, $"   - Среднее время доставки: {(deliveryStats.Any() ? deliveryStats.Average(x => x.Key * x.Value) / deliveryStats.Sum(x => x.Value) : 0):F1} дней");
         }
-
-        private static async Task<OrderResult> ProcessOrderAsync(Order order, Storage storage, string logFile)
+        private static OrderResult ProcessOrder(Order order, Storage storage, string logFile)
         {
             var result = new OrderResult { OrderId = order.Id };
 
             bool hasAll = order.GoodsList.All(g => storage.Inventory.TryGetValue(g, out var info) && info.Count > 0);
-            Utils.LogToFile(logFile, $"[Order {order.Id}] Inventory Check: {(hasAll ? "PASS" : "FAIL")} - {order.GoodsList.Count} items", _logLock);
+            Utils.LogToFile(logFile, $"[Order {order.Id}] Inventory Service: {(hasAll ? "PASS" : "FAIL")} - {order.GoodsList.Count} items", _logLock);
 
             if (!hasAll)
             {
@@ -119,16 +91,14 @@ namespace ParallelProcessingApp
 
             double total = order.GoodsList.Sum(g => storage.Inventory[g].Price);
             double final = total * (1 - order.PersonalDiscount);
-            Utils.LogToFile(logFile, $"[Order {order.Id}] Pricing: Total={total:F2}, Discount={order.PersonalDiscount:P1}, Final={final:F2}", _logLock);
-
+            Utils.LogToFile(logFile, $"[Order {order.Id}] Pricing Service: Total={total:F2}, Discount={order.PersonalDiscount:P1}, Final={final:F2}", _logLock);
             result.FinalAmount = final;
 
             int days = Math.Max(1, order.Address.Length % 7);
-            Utils.LogToFile(logFile, $"[Order {order.Id}] Shipping: Address='{order.Address}', Delivery={days} days", _logLock);
-
+            Utils.LogToFile(logFile, $"[Order {order.Id}] Shipping Service: Address='{order.Address}', Delivery={days} days", _logLock);
             result.DeliveryDays = days;
-            result.IsFullyProcessed = true;
 
+            result.IsFullyProcessed = true;
             return result;
         }
 
